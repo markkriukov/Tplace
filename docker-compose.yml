@@ -1,0 +1,160 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: tplace-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=tplace
+      - POSTGRES_USER=tplace
+      - POSTGRES_PASSWORD=tplace
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tplace -d tplace"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: tplace-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@tplace.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "127.0.0.1:5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  database-init:
+    build:
+      context: ./backend/node
+    environment:
+      - DATABASE_URL=postgresql://tplace:tplace@postgres:5432/tplace
+      - MIGRATIONS_PATH=/shared-db/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/db:/shared-db:ro
+    command: sh -c "npm run db:migrate && npm run db:catalog:sync"
+
+  backend-node:
+    build:
+      context: ./backend/node
+    container_name: tplace-backend-node
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4000:4000"
+    environment:
+      - PORT=4000
+      - JWT_SECRET=${JWT_SECRET:?Set a random JWT_SECRET of at least 32 bytes}
+      - ALLOW_DEV_AUTH=${ALLOW_DEV_AUTH:-false}
+      - TRUSTED_PROXY_ADDRESSES=${TRUSTED_PROXY_ADDRESSES:-}
+      - HTTP_RATE_LIMIT=${HTTP_RATE_LIMIT:-300}
+      - HTTP_WRITE_RATE_LIMIT=${HTTP_WRITE_RATE_LIMIT:-120}
+      - HTTP_AUTH_RATE_LIMIT=${HTTP_AUTH_RATE_LIMIT:-30}
+      - HTTP_USER_RATE_LIMIT=${HTTP_USER_RATE_LIMIT:-300}
+      - HTTP_USER_WRITE_RATE_LIMIT=${HTTP_USER_WRITE_RATE_LIMIT:-120}
+      - DATABASE_URL=postgresql://tplace:tplace@postgres:5432/tplace
+      - MIGRATIONS_PATH=/shared-db/migrations
+      - MARKETPLACE_MIN_PRICE=${MARKETPLACE_MIN_PRICE:-0.5}
+      - MARKETPLACE_MAX_PRICE=${MARKETPLACE_MAX_PRICE:-100000}
+      - MARKETPLACE_FEE_BPS=${MARKETPLACE_FEE_BPS:-50}
+      - DB_SLOW_QUERY_MS=${DB_SLOW_QUERY_MS:-0}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - CUSTODY_TELEGRAM_USER_ID=${CUSTODY_TELEGRAM_USER_ID:-}
+      - CUSTODY_MAX_AGE_SECONDS=${CUSTODY_MAX_AGE_SECONDS:-7200}
+      - CUSTODY_RECONCILE_ALERTS=${CUSTODY_RECONCILE_ALERTS:-true}
+      - TELEGRAM_INIT_DATA_MAX_AGE_SECONDS=86400
+      - TON_NETWORK=${TON_NETWORK:--239}
+      - TON_RPC_URL=${TON_RPC_URL:-}
+      - TON_RPC_API_KEY=${TON_RPC_API_KEY:-}
+      - TON_TREASURY_ADDRESS=${TON_TREASURY_ADDRESS:-}
+      - TON_TREASURY_MNEMONIC=${TON_TREASURY_MNEMONIC:-}
+      - TON_TREASURY_MNEMONIC_FILE=${TON_TREASURY_MNEMONIC_FILE:-}
+      - TON_PAYOUTS_ENABLED=${TON_PAYOUTS_ENABLED:-true}
+      - TON_WITHDRAW_FEE_NANO=${TON_WITHDRAW_FEE_NANO:-50000000}
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./backend/node:/app
+      - ./backend/db:/shared-db:ro
+      - backend_node_modules:/app/node_modules
+
+  backend-python:
+    build:
+      context: ./backend/python-worker
+    container_name: tplace-backend-python
+    restart: unless-stopped
+    init: true
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
+    environment:
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID:-}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH:-}
+      - CUSTODY_RECONCILE_INTERVAL_SECONDS=${CUSTODY_RECONCILE_INTERVAL_SECONDS:-3600}
+      - GIFT_WITHDRAW_MAX_STARS=${GIFT_WITHDRAW_MAX_STARS:-25}
+      - GIFT_CUSTODY_SCAN_TIMEOUT_SECONDS=${GIFT_CUSTODY_SCAN_TIMEOUT_SECONDS:-60}
+      - CUSTODY_TELEGRAM_USER_ID=${CUSTODY_TELEGRAM_USER_ID:?Set the verified Telegram custodian ID}
+      - TELEGRAM_SESSION_NAME=${TELEGRAM_SESSION_NAME:-account}
+      - DATABASE_URL=postgresql+psycopg://tplace:tplace@postgres:5432/tplace
+      - TELEGRAM_SESSION_WORKDIR=/app/runtime
+    volumes:
+      - ./backend/python-worker:/app
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tplace-frontend
+    depends_on:
+      - backend-node
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-/api}
+      - VITE_ALLOW_DEV_AUTH=${VITE_ALLOW_DEV_AUTH:-false}
+      - VITE_DEV_TELEGRAM_ID=${VITE_DEV_TELEGRAM_ID:-100001}
+      - VITE_DEV_USERNAME=${VITE_DEV_USERNAME:-dev_user}
+      - VITE_DEV_FIRST_NAME=${VITE_DEV_FIRST_NAME:-Dev}
+      - VITE_API_PROXY_TARGET=http://backend-node:4000
+      - VITE_TONCONNECT_MANIFEST_URL=${VITE_TONCONNECT_MANIFEST_URL:-}
+      - VITE_TONCONNECT_APP_URL=${VITE_TONCONNECT_APP_URL:-https://dev.tplace.store}
+      - VITE_TONCONNECT_TWA_RETURN_URL=${VITE_TONCONNECT_TWA_RETURN_URL:-}
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=dev.tplace.store
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    command: >
+      sh -c "npm ci &&
+             npm run dev -- --host 0.0.0.0 --port 5173 --strictPort"
+
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:2026.10.0
+    container_name: tplace-cloudflare-tunnel
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    command: tunnel --no-autoupdate run
+    profiles:
+      - tunnel
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  backend_node_modules:
+  frontend_node_modules:

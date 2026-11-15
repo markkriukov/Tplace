@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2024",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/http/contracts.ts",
+    "src/http/errors.js",
+    "src/http/rate-limit.js",
+    "src/security.js",
+    "src/http/metrics.js",
+    "src/modules/wallet/wallet-money.utils.js",
+    "src/modules/auth/auth-token.signer.js",
+    "src/modules/wallet/wallet.mapper.js"
+  ]
+}

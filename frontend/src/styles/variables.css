@@ -1,0 +1,30 @@
+:root {
+  --app-max-width: 1280px;
+
+  /* Shared palette: surfaces, content, actions and semantic feedback. */
+  --color-bg: #0b1018;
+  --color-surface: #121b27;
+  --color-surface-raised: #1b2838;
+  --color-surface-inset: #0f1722;
+  --color-border: #2c3e52;
+  --color-border-strong: #405671;
+  --color-text: #edf4fc;
+  --color-text-secondary: #a3b4c8;
+  --color-text-muted: #8b9fb7;
+  --color-accent: #69b4ff;
+  --color-accent-hover: #88c5ff;
+  --color-accent-soft: #192f47;
+  --color-accent-soft-hover: #223e5b;
+  --color-on-accent: #081522;
+  --color-success: #62d6a2;
+  --color-success-soft: #163b30;
+  --color-danger: #ff8e9b;
+  --color-danger-soft: #40232e;
+  --color-overlay: rgba(3, 8, 15, 0.76);
+  --color-shadow: rgba(0, 0, 0, 0.32);
+  --color-focus: var(--color-accent);
+  --color-shimmer: rgba(237, 244, 252, 0.07);
+  /* Light backing keeps dark gift symbols legible without recoloring artwork. */
+  --color-symbol-bg: #dce6f1;
+  --color-surface-transparent: rgba(18, 27, 39, 0);
+}

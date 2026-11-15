@@ -1,0 +1,24 @@
+# Disposable PostgreSQL for integration tests. A separate project: it needs no .env
+# and `down` leaves the main stack alone. Data lives in memory and is gone after `down`.
+name: tplace-test
+
+services:
+  postgres-test:
+    image: postgres:18-alpine
+    container_name: tplace-postgres-test
+    environment:
+      - POSTGRES_DB=tplace_test
+      - POSTGRES_USER=tplace
+      - POSTGRES_PASSWORD=tplace
+    # Durability is pointless for throwaway data and only slows the tests down.
+    command: ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
+    ports:
+      - "127.0.0.1:55432:5432"
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      # Probe over TCP: the server started during initialization listens only on the socket.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U tplace -d tplace_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30

@@ -1,0 +1,44 @@
+# Logs
+logs
+*.log
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local Python and Telegram runtime files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.session
+*.session-*
+backend/python-worker/runtime/
+backend/node/runtime/
+backend/db/backups/
+.env.*
+!.env.example
+
+deploy/secrets/*
+!deploy/secrets/.gitkeep
+
+frontend/tests/test-results/
+frontend/playwright-report/

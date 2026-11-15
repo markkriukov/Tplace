@@ -1,0 +1,72 @@
+.inventory-modes {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.inventory-mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  border-radius: 11px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inventory-mode-count {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--color-surface-raised);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.inventory-mode-btn-active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.inventory-main-btn {
+  flex: 1;
+}
+
+.inventory-cancel-btn {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.inventory-list-btn {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.inventory-icon-btn {
+  font-size: 16px;
+}
+
+.inventory-meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inventory-listed-price {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* .app-shell reserves 110px below the page, but the scroll-to-top button reaches
+   136px; this lets the last row of actions scroll clear of it. */
+.inventory-page-end {
+  height: calc(40px + env(safe-area-inset-bottom, 0px));
+}

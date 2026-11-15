@@ -1,0 +1,23 @@
+/* Reuse the real cards' layout classes so loading content matches their geometry. */
+.loading-skeleton { display: grid; gap: 10px; width: 100%; min-width: 0; }
+.loading-skeleton-wallet, .loading-skeleton-sales { display: block; }
+.loading-skeleton-shape { position: relative; overflow: hidden; background: var(--color-surface-raised); border-radius: 6px; }
+.loading-skeleton-shape::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, var(--color-shimmer) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: loading-shimmer 1.6s ease-in-out infinite;
+}
+.loading-skeleton-line { display: inline-block; height: 0.8em; max-width: 100%; vertical-align: middle; }
+.loading-skeleton-side { width: 80px; }
+.loading-skeleton-offer-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.gift-card-skeleton .gift-image { border-radius: 18px; }
+.gift-card-skeleton:hover { transform: none; }
+.loading-skeleton .loading-skeleton-shape.profile-offer-accept,
+.loading-skeleton .loading-skeleton-shape.profile-offer-decline { background: var(--color-surface-raised); }
+.loading-skeleton-inline { display: inline-block; width: 72px; max-width: 100%; vertical-align: middle; }
+.loading-skeleton-inline .loading-skeleton-shape { display: block; height: 1em; min-height: 12px; background: currentColor; opacity: 0.3; }
+@keyframes loading-shimmer { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .loading-skeleton-shape::after { animation: none; } }

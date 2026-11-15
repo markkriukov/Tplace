@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+**/.venv
+**/runtime
+**/__pycache__
+**/dist
+**/*.session*
+backend/db/backups
+deploy/secrets

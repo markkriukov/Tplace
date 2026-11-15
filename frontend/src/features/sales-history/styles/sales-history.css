@@ -1,0 +1,150 @@
+.sales-history-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  background: var(--color-overlay);
+  animation: overlay-fade-in 220ms ease;
+}
+
+.sales-history-panel {
+  width: 100%;
+  height: 100svh;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px 0;
+  animation: panel-slide-in 260ms cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+
+.sales-history-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sales-history-title {
+  margin: 0;
+  font-size: 33px;
+  color: var(--color-text);
+}
+
+.sales-history-close-btn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 24px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.sales-history-error {
+  margin: 0 0 10px;
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.sales-history-search-row {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.sales-history-filter-bar {
+  margin-top: 0;
+  margin-bottom: 10px;
+  flex: 0 0 auto;
+}
+
+.sales-history-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+
+.sales-history-list::-webkit-scrollbar {
+  display: none;
+}
+
+.sales-history-empty {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.sales-history-item {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 8px;
+  background: var(--color-surface);
+}
+
+.sales-history-image {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+}
+
+.sales-history-main {
+  min-width: 0;
+}
+
+.sales-history-name {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sales-history-name span {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sales-history-meta {
+  margin: 3px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sales-history-side {
+  text-align: right;
+}
+
+.sales-history-price {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.sales-history-time {
+  margin: 3px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}

@@ -1,0 +1,45 @@
+import { test, expect } from '@playwright/test'
+
+test('profile shows skeletons once, retains statistics across tabs and failures, and isolates accounts', async ({ page }) => {
+  const requests = []
+  await page.route('**/api/my/profile', route => { requests.push(route) })
+  const respond = async (stats) => {
+    await expect.poll(() => requests.length).toBe(1)
+    await requests.shift().fulfill({ json: { ok: true, profile: { stats } } })
+  }
+  await page.goto('/tests/e2e/fixtures/fixture.html?profile')
+  const toggle = page.getByRole('button', { name: 'Switch profile' })
+  const values = page.locator('.profile-stat-value')
+  const skeletons = page.locator('.profile-stat-skeleton')
+  await toggle.click()
+  await expect(skeletons).toHaveCount(3)
+  await expect(values).toHaveText(['', '', ''])
+  await respond({ gifts: 7, sales: 12, buys: 0 })
+  await expect(values).toHaveText(['7', '12', '0'])
+  await expect(skeletons).toHaveCount(0)
+
+  await toggle.click()
+  await toggle.click()
+  await expect.poll(() => requests.length).toBe(1)
+  await expect(values).toHaveText(['7', '12', '0'])
+  await expect(skeletons).toHaveCount(0)
+  await requests.shift().fulfill({ status: 503, json: { ok: false } })
+  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(values).toHaveText(['7', '12', '0'])
+  await page.getByRole('button', { name: 'Retry' }).click()
+  await expect(values).toHaveText(['7', '12', '0'])
+  await respond({ gifts: 8, sales: 13, buys: 1 })
+  await expect(values).toHaveText(['8', '13', '1'])
+
+  await page.getByRole('button', { name: 'Switch account' }).click()
+  await expect(skeletons).toHaveCount(3)
+  await expect.poll(() => requests.length).toBe(1)
+  await requests.shift().fulfill({ status: 503, json: { ok: false } })
+  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(skeletons).toHaveCount(0)
+  await expect(values).toHaveText(['—', '—', '—'])
+  await page.getByRole('button', { name: 'Retry' }).click()
+  await expect(skeletons).toHaveCount(3)
+  await respond({ gifts: 2, sales: 0, buys: 0 })
+  await expect(values).toHaveText(['2', '0', '0'])
+})
